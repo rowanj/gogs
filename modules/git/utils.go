@@ -22,12 +22,29 @@ func parsePrettyFormatLog(repo *Repository, logByts []byte) (*list.List, error) 
 
 	parts := bytes.Split(logByts, []byte{'\n'})
 
-	for _, commitId := range parts {
-		commit, err := repo.GetCommit(string(commitId))
-		if err != nil {
-			return nil, err
+	const bufferPipeline = 100
+	commitsToParse := make(chan string, bufferPipeline)
+	parsedCommits := make(chan *Commit, bufferPipeline)
+
+	go func() {
+		for commitId := range commitsToParse {
+			commit, err := repo.GetCommit(commitId)
+			if err != nil {
+			}
+			parsedCommits <- commit
 		}
-		l.PushBack(commit)
+		close(parsedCommits)
+	}()
+
+	go func() {
+		for _, commitId := range parts {
+			commitsToParse <- string(commitId)
+		}
+		close(commitsToParse)
+	}()
+
+	for parsedCommit := range parsedCommits {
+		l.PushBack(parsedCommit)
 	}
 
 	return l, nil
