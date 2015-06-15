@@ -102,12 +102,9 @@ l:
 }
 
 func (repo *Repository) getCommit(id sha1) (*Commit, error) {
-	if repo.commitCache != nil {
-		if c, ok := repo.commitCache[id]; ok {
-			return c, nil
-		}
-	} else {
-		repo.commitCache = make(map[sha1]*Commit, 10)
+	cached := commitCache.get(id)
+	if cached != nil {
+		return cached, nil
 	}
 
 	data, bytErr, err := com.ExecCmdDirBytes(repo.Path, "git", "cat-file", "-p", id.String())
@@ -122,7 +119,7 @@ func (repo *Repository) getCommit(id sha1) (*Commit, error) {
 	commit.repo = repo
 	commit.Id = id
 
-	repo.commitCache[id] = commit
+	commitCache.set(id, commit)
 	return commit, nil
 }
 

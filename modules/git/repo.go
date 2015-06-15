@@ -12,8 +12,7 @@ import (
 type Repository struct {
 	Path string
 
-	commitCache map[sha1]*Commit
-	tagCache    map[sha1]*Tag
+	tagCache map[sha1]*Tag
 }
 
 // OpenRepository opens the repository at the given path.
