@@ -11,8 +11,6 @@ import (
 // Repository represents a Git repository.
 type Repository struct {
 	Path string
-
-	tagCache map[sha1]*Tag
 }
 
 // OpenRepository opens the repository at the given path.

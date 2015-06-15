@@ -51,12 +51,9 @@ func (repo *Repository) CreateTag(tagName, idStr string) error {
 }
 
 func (repo *Repository) getTag(id sha1) (*Tag, error) {
-	if repo.tagCache != nil {
-		if t, ok := repo.tagCache[id]; ok {
-			return t, nil
-		}
-	} else {
-		repo.tagCache = make(map[sha1]*Tag, 10)
+	cached := tagCache.get(id)
+	if cached != nil {
+		return cached, nil
 	}
 
 	// Get tag type.
@@ -74,7 +71,7 @@ func (repo *Repository) getTag(id sha1) (*Tag, error) {
 			Type:   string(COMMIT),
 			repo:   repo,
 		}
-		repo.tagCache[id] = tag
+		tagCache.set(id, tag)
 		return tag, nil
 	}
 
@@ -92,7 +89,7 @@ func (repo *Repository) getTag(id sha1) (*Tag, error) {
 	tag.Id = id
 	tag.repo = repo
 
-	repo.tagCache[id] = tag
+	tagCache.set(id, tag)
 	return tag, nil
 }
 
