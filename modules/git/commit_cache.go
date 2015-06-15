@@ -20,6 +20,9 @@ func (c *_commitCache) get(commitId sha1) *Commit {
 
 func (c *_commitCache) set(commitId sha1, commit *Commit) {
 	c.Lock()
+	if c.m == nil {
+		c.m = make(map[sha1]*Commit)
+	}
 	c.m[commitId] = commit
 	c.Unlock()
 }
